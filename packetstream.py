@@ -100,8 +100,8 @@ def install_docker():
         print('Docker is installed')
         return
     # Download and use get-docker.sh script to install docker
-    get_docker_script = 'https://raw.githubusercontent.com/moby/moby/master/contrib/get-docker.sh'
-    subprocess.call(['wget', get_docker_script])
+    subprocess.call(
+        ['curl', '-fsSL', 'https://get.docker.com', '-o', 'get-docker.sh'])
     subprocess.call(['chmod', '+x', 'get-docker.sh'])
     subprocess.call(['./get-docker.sh'])
     # check if docker is installed
@@ -124,7 +124,8 @@ def install_docker_compose():
                     '-o', '/usr/local/bin/docker-compose'])
     subprocess.call(['chmod', '+x', '/usr/local/bin/docker-compose'])
     # check if docker compose is installed
-    docker_compose_installed = subprocess.check_output(['docker-compose', 'version'])
+    docker_compose_installed = subprocess.check_output(
+        ['docker-compose', 'version'])
     if 'docker-compose version' in docker_compose_installed:
         print('Docker-compose installed')
     else:
@@ -135,7 +136,7 @@ def install_docker_compose():
 def deploy_containers():
     # download docker-compose file
     subprocess.call(
-        ['wget', '-Nnv', 'https://raw.githubusercontent.com/Chasing66/packetstream/main/docker-compose.yaml'])
+        ['wget', '-q', 'https://raw.githubusercontent.com/Chasing66/packetstream/main/docker-compose.yaml', '-O', 'docker-compose.yaml'])
     # set the replica number in docker-compose.yaml via sed
     subprocess.call(['sed', '-i', 's/replicas:.*/replicas: ' +
                     str(args.number) + '/g', 'docker-compose.yaml'])

@@ -45,14 +45,14 @@
 ### 使用方法
 ```shell
 mkdir PacketStream && cd PacketStream
-wget -Nnv https://raw.githubusercontent.com/Chasing66/PacketStream/main/packetstream.py &>/dev/null
+wget -q https://raw.githubusercontent.com/Chasing66/PacketStream/main/packetstream.py -O packetstream.py
 chmod +x packetstream.py
 python3 packetstream.py -c "你的CID" -n "容器数量" -p "http代理"
 ```
 #### 例如
 ```shell
 mkdir PacketStream && cd PacketStream
-wget -Nnv https://raw.githubusercontent.com/Chasing66/PacketStream/main/packetstream.py &>/dev/null
+wget -q https://raw.githubusercontent.com/Chasing66/PacketStream/main/packetstream.py -O packetstream.py
 chmod +x packetstream.py
 python3 packetstream.py -c 2HVV -n 5
 ```
