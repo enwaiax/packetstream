@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  packetstream:
+    deploy:
+      mode: replicated
+      replicas: 2
+      restart_policy:
+        condition: on-failure
+        max_attempts: 2
+    image: packetstream/psclient:latest
+    environment: 
+      - CID=${CID}
+      - http_proxy=${http_proxy}
+      - https_proxy=${https_proxy}
