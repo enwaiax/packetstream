@@ -42,7 +42,6 @@
 
 
 ### 使用方法
-- 交互式
 ```shell
 mkdir PacketStream && cd PacketStream
 wget -Nnv https://raw.githubusercontent.com/Chasing66/PacketStream/main/packetstream.py &>/dev/null
