@@ -24,7 +24,10 @@ def get_args():
     if os.path.isfile(".env"):
         os.remove(".env")
     with open('.env', 'w') as f:
-        f.writelines(['http_proxy=' + args.proxy + '\n' + 'https_proxy=' + args.proxy + '\n' + 'CID=' + args.cid + '\n'])
+        if args.proxy:
+            f.write('http_proxy=' + args.proxy + '\n')
+            f.write('https_proxy=' + args.proxy + '\n')
+        f.write('CID=' + args.cid + '\n')
     return args
 
 def check_run_as_root():
