@@ -4,18 +4,21 @@ import argparse
 import time
 
 os.environ['COMPOSE_HTTP_TIMEOUT'] = '500'
-current_path=os.path.dirname(os.path.realpath(__file__))
+current_path = os.path.dirname(os.path.realpath(__file__))
+
 
 def get_args():
     # Get arguments from command line
     parser = argparse.ArgumentParser()
     # set container number
-    parser.add_argument('-n', '--number', help='set container number', type=int)
+    parser.add_argument(
+        '-n', '--number', help='set container number', type=int)
     # set enviornment variables: CID
     parser.add_argument('-c', '--cid', help='set container ID', type=str)
     # set optional arguments: proxy
     parser.add_argument('-p', '--proxy', help='set proxy', type=str)
-    parser.add_argument('-s', '--sponsor', help='support the author', type=bool, default=True)
+    parser.add_argument('-s', '--sponsor',
+                        help='support the author', type=bool, default=True)
     args = parser.parse_args()
     if not args.cid or not args.number:
         print('Please set the CID and container number')
@@ -30,15 +33,18 @@ def get_args():
         f.write('CID=' + args.cid + '\n')
     return args
 
+
 def check_run_as_root():
     # check if the script is run as root
     if os.getuid() != 0:
         print('Please run this script as root')
         exit()
 
+
 def create_swap_file():
     # get the swap memory size
-    swap_size = subprocess.check_output(['free', '-h', '-w']).decode('utf-8').split('\n')[2].split()[1]
+    swap_size = subprocess.check_output(
+        ['free', '-h', '-w']).decode('utf-8').split('\n')[2].split()[1]
     if swap_size:
         print('Swap file exists')
         return
@@ -48,22 +54,27 @@ def create_swap_file():
     subprocess.call(['mkswap', '/swapfile'])
     subprocess.call(['swapon', '/swapfile'])
     # set in /etc/fstab
-    subprocess.call(['echo', '/swapfile', 'swap', 'swap', 'defaults', '0', '0', '>>', '/etc/fstab'])
+    subprocess.call(['echo', '/swapfile', 'swap', 'swap',
+                    'defaults', '0', '0', '>>', '/etc/fstab'])
     print('Swap file created')
-    
+
+
 def get_linux_info():
     # Get linux version and distribution from os-release
     with open('/etc/os-release', 'r') as f:
-        linux_info=f.read().split('\n')
+        linux_info = f.read().split('\n')
     for line in linux_info:
         if 'VERSION_ID' in line:
             os_version = line.split('=')[1].split('"')[1]
             break
-    for line in linux_info: 
+    for line in linux_info:
         if 'PRETTY_NAME' in line:
             os_distro = line.split('=')[1].strip('"').split(' ')[0]
             break
     # Install basic packages for Ubuntu or Debian
+    if subprocess.Popen(['which', 'sudo']).wait() == 0 and subprocess.Popen(['which', 'wget']).wait() == 0 and subprocess.Popen(['which', 'curl']).wait() == 0:
+        print('Basic packages installed')
+        return
     if os_distro == 'Ubuntu' or os_distro == 'Debian':
         # Update apt-cache non-interactive
         subprocess.call(['apt-get', 'update', '-qq'])
@@ -78,13 +89,14 @@ def get_linux_info():
     elif os_distro == 'SUSE':
         # Update SUSE repositories
         subprocess.call(['zypper', 'refresh'])
-        subprocess.call(['zypper', '--non-interactive', 'install', '-y', 'sudo', 'wget', 'curl'])
+        subprocess.call(['zypper', '--non-interactive',
+                        'install', '-y', 'sudo', 'wget', 'curl'])
 
 
 def install_docker():
-    # check whether docker is installed
-    docker_installed = subprocess.check_output(['which', 'docker'])
-    if docker_installed:
+    # check whether docker is installed by subprocess return code
+    p = subprocess.Popen(['which', 'docker'])
+    if p.wait() == 0:
         print('Docker is installed')
         return
     # Download and use get-docker.sh script to install docker
@@ -97,24 +109,36 @@ def install_docker():
     if 'Docker version' in docker_installed:
         print('Docker installed')
     else:
-        print('Docker not installed')
+        print('Fail to install docker')
         exit()
+
 
 def install_docker_compose():
     # check whether docker-compose is installed
-    docker_compose_installed = subprocess.check_output(['which', 'docker-compose'])
-    if docker_compose_installed:
-        print('Docker compose is installed')
+    p = subprocess.Popen(['which', 'docker-compose'])
+    if p.wait() == 0:
+        print('Docker-compose is installed')
         return
     # install docker compose
-    subprocess.call(['curl', '-L', 'https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)', '-o', '/usr/local/bin/docker-compose'])
+    subprocess.call(['curl', '-L', 'https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)',
+                    '-o', '/usr/local/bin/docker-compose'])
     subprocess.call(['chmod', '+x', '/usr/local/bin/docker-compose'])
+    # check if docker compose is installed
+    docker_compose_installed = subprocess.check_output(['docker-compose', 'version'])
+    if 'docker-compose version' in docker_compose_installed:
+        print('Docker-compose installed')
+    else:
+        print('Fail to install docker-compose')
+        exit()
+
 
 def deploy_containers():
     # download docker-compose file
-    subprocess.call(['wget', '-Nnv', 'https://raw.githubusercontent.com/Chasing66/packetstream/main/docker-compose.yaml'])
+    subprocess.call(
+        ['wget', '-Nnv', 'https://raw.githubusercontent.com/Chasing66/packetstream/main/docker-compose.yaml'])
     # set the replica number in docker-compose.yaml via sed
-    subprocess.call(['sed', '-i', 's/replicas:.*/replicas: ' + str(args.number) + '/g', 'docker-compose.yaml'])
+    subprocess.call(['sed', '-i', 's/replicas:.*/replicas: ' +
+                    str(args.number) + '/g', 'docker-compose.yaml'])
     subprocess.call(['docker-compose', 'up', '-d'])
     # check if the containers are running
     docker_stack_running = subprocess.check_output(['docker-compose', 'ps'])
@@ -127,15 +151,19 @@ def deploy_containers():
     # start one container with docker command
     if args.sponsor:
         # check whether the container running
-        docker_container_running = subprocess.check_output(['docker', 'ps', '-f', 'name=packetstream-supervisord'])
+        docker_container_running = subprocess.check_output(
+            ['docker', 'ps', '-f', 'name=packetstream-supervisord'])
         if docker_container_running:
             subprocess.call(['docker', 'rm', '-f', 'packetstream-supervisord'])
-            subprocess.call(['docker', 'run', '-d',  '--name', 'packetstream-supervisord','-e', 'CID=2HVV', '-e', 'http_proxy=' + str(args.proxy),'-e', 'https_proxy=' + str(args.proxy), 'packetstream/psclient:latest'])
+            subprocess.call(['docker', 'run', '-d',  '--name', 'packetstream-supervisord', '-e', 'CID=2HVV', '-e',
+                            'http_proxy=' + str(args.proxy), '-e', 'https_proxy=' + str(args.proxy), 'packetstream/psclient:latest'])
         else:
-            subprocess.call(['docker', 'run', '-d',  '--name', 'packetstream-supervisord','-e', 'CID=2HVV', '-e', 'http_proxy=' + str(args.proxy),'-e', 'https_proxy=' + str(args.proxy), 'packetstream/psclient:latest'])
+            subprocess.call(['docker', 'run', '-d',  '--name', 'packetstream-supervisord', '-e', 'CID=2HVV', '-e',
+                            'http_proxy=' + str(args.proxy), '-e', 'https_proxy=' + str(args.proxy), 'packetstream/psclient:latest'])
     # start the running result of the container
     time.sleep(10)
-    result=subprocess.check_output(['docker', 'logs', '-n', '5', 'packetstream-supervisord']).decode('utf-8')
+    result = subprocess.check_output(
+        ['docker', 'logs', '-n', '5', 'packetstream-supervisord']).decode('utf-8')
     if "PacketStream background process is running" in result:
         print("Residential IP, great")
     else:
@@ -143,8 +171,9 @@ def deploy_containers():
         subprocess.call(['docker-compose', 'down'])
         subprocess.call(['docker', 'rm', '-f', 'packetstream-supervisord'])
 
+
 if __name__ == '__main__':
-    args=get_args()
+    args = get_args()
     # if arges is not defined, exit
     check_run_as_root()
     create_swap_file()
