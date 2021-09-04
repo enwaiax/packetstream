@@ -22,8 +22,9 @@
   </p>
 </p>
 
-## MJJ
+## 重要提醒
 - 请低调使用，张弛有度
+- peer2profit显示Residential，packetstream并不一定是Residential，二者检测机制不同，请自行踩坑
 
 ## 充电支持
 
