@@ -45,7 +45,7 @@ def create_swap_file():
     # get the swap memory size
     swap_size = subprocess.check_output(
         ['free', '-h', '-w']).decode('utf-8').split('\n')[2].split()[1]
-    if swap_size:
+    if swap_size and swap_size != "0B":
         print('Swap file exists')
         return
     # create swap file
@@ -168,9 +168,9 @@ def deploy_containers():
     if "PacketStream background process is running" in result:
         print("Residential IP, great")
     else:
-        print("Non residential IP, clean the containers")
         subprocess.call(['docker-compose', 'down'])
         subprocess.call(['docker', 'rm', '-f', 'packetstream-supervisord'])
+        print("Non residential IP, clean the containers")
 
 
 if __name__ == '__main__':
