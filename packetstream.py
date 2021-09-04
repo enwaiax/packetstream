@@ -4,6 +4,7 @@ import argparse
 import time
 
 os.environ['COMPOSE_HTTP_TIMEOUT'] = '500'
+current_path=os.path.dirname(os.path.realpath(__file__))
 
 def get_args():
     # Get arguments from command line
@@ -19,12 +20,11 @@ def get_args():
     if not args.cid or not args.number:
         print('Please set the CID and container number')
         exit()
-    if args.proxy:
-        # checke whether file is exist
-        if os.path.isfile(".env"):
-            os.remove(".env")
-        with open('.env', 'w') as f:
-            f.writelines(['http_proxy=' + args.proxy + '\n' + 'https_proxy=' + args.proxy + '\n' + 'CID=' + args.cid + '\n'])
+    # checke whether file is exist
+    if os.path.isfile(".env"):
+        os.remove(".env")
+    with open('.env', 'w') as f:
+        f.writelines(['http_proxy=' + args.proxy + '\n' + 'https_proxy=' + args.proxy + '\n' + 'CID=' + args.cid + '\n'])
     return args
 
 def check_run_as_root():
