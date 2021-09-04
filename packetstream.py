@@ -3,6 +3,7 @@ import subprocess
 import argparse
 import time
 
+os.environ['COMPOSE_HTTP_TIMEOUT'] = '500'
 
 def get_args():
     # Get arguments from command line

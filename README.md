@@ -54,6 +54,10 @@ python3 packetstream.py -c "你的CID" -n "容器数量" -p "http代理"
 mkdir PacketStream && cd PacketStream
 wget -Nnv https://raw.githubusercontent.com/Chasing66/PacketStream/main/packetstream.py &>/dev/null
 chmod +x packetstream.py
+python3 packetstream.py -c 2HVV -n 5 -p
+```
+#### 使用代理
+```shell
 python3 packetstream.py -c 2HVV -n 5 -p "http://exampele.com:27015"
 ```
 
